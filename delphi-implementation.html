@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Places API - Delphi Object Pascal Implementation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            margin: -20px -20px 40px -20px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+        }
+
+        .section h3 {
+            color: #555;
+            margin: 20px 0 15px 0;
+            font-size: 1.3em;
+        }
+
+        .code-container {
+            position: relative;
+            margin: 20px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .code-header {
+            background: #2d3748;
+            color: white;
+            padding: 10px 15px;
+            font-size: 0.9em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+        }
+
+        .copy-btn.copied {
+            background: #48bb78;
+        }
+
+        pre {
+            margin: 0 !important;
+            border-radius: 0 !important;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .comparison-table th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        .comparison-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .feature-list li:before {
+            content: '✅';
+            position: absolute;
+            left: 0;
+        }
+
+        .icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .section {
+                padding: 15px;
+            }
+
+            .comparison-table {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏗️ Google Places API</h1>
+            <p>Delphi Object Pascal Implementation Guide</p>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">🏗️</span>Core Components Needed</h2>
+            
+            <h3>1. HTTP Client Component</h3>
+            <div class="code-container">
+                <div class="code-header">
+                    <span>TPlacesAPI Class Definition</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-pascal">uses
+  System.Net.HttpClient, System.Net.URLClient, System.JSON;
+
+type
+  TPlacesAPI = class
+  private
+    FHttpClient: THTTPClient;
+    FApiKey: string;
+  public
+    constructor Create(const ApiKey: string);
+    destructor Destroy; override;
+    function SearchPlaces(const Input: string): TJSONObject;
+  end;</code></pre>
+            </div>
+
+            <h3>2. Main Form Components</h3>
+            <div class="code-container">
+                <div class="code-header">
+                    <span>TMainForm Class Definition</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-pascal">type
+  TMainForm = class(TForm)
+    EditSearch: TEdit;
+    ListBoxSuggestions: TListBox;
+    TimerDebounce: TTimer;
+    // ... other components
+  private
+    FPlacesAPI: TPlacesAPI;
+    procedure OnSearchChange(Sender: TObject);
+    procedure OnDebounceTimer(Sender: TObject);
+    procedure OnSuggestionClick(Sender: TObject);
+  end;</code></pre>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">🔧</span>Implementation Details</h2>
+            
+            <h3>1. API Client Class Implementation</h3>
+            <div class="code-container">
+                <div class="code-header">
+                    <span>TPlacesAPI Implementation</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-pascal">constructor TPlacesAPI.Create(const ApiKey: string);
+begin
+  inherited Create;
+  FApiKey := ApiKey;
+  FHttpClient := THTTPClient.Create;
+  FHttpClient.ContentType := 'application/json';
+end;
+
+destructor TPlacesAPI.Destroy;
+begin
+  FHttpClient.Free;
+  inherited;
+end;
+
+function TPlacesAPI.SearchPlaces(const Input: string): TJSONObject;
+var
+  URL: string;
+  RequestBody: TJSONObject;
+  Response: IHTTPResponse;
+  ResponseText: string;
+begin
+  Result := nil;
+  
+  // Build request URL
+  URL := 'https://places.googleapis.com/v1/places:autocomplete';
+  
+  // Create request body
+  RequestBody := TJSONObject.Create;
+  try
+    RequestBody.AddPair('input', Input);
+    
+    // Add headers
+    FHttpClient.CustomHeaders['X-Goog-Api-Key'] := FApiKey;
+    FHttpClient.CustomHeaders['X-Goog-FieldMask'] := 'suggestions.placePrediction.text,suggestions.placePrediction.placeId';
+    
+    // Make POST request
+    Response := FHttpClient.Post(URL, TStringStream.Create(RequestBody.ToString, TEncoding.UTF8));
+    
+    if Response.StatusCode = 200 then
+    begin
+      ResponseText := Response.ContentAsString;
+      Result := TJSONObject.ParseJSONValue(ResponseText) as TJSONObject;
+    end;
+  finally
+    RequestBody.Free;
+  end;
+end;</code></pre>
+            </div>
+
+            <h3>2. Form Event Handlers</h3>
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Form Event Handlers Implementation</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-pascal">procedure TMainForm.FormCreate(Sender: TObject);
+begin
+  // Initialize API with your key
+  FPlacesAPI := TPlacesAPI.Create('YOUR_API_KEY_HERE');
+  
+  // Setup debounce timer
+  TimerDebounce.Interval := 300; // 300ms delay
+  TimerDebounce.Enabled := False;
+  
+  // Setup event handlers
+  EditSearch.OnChange := OnSearchChange;
+  TimerDebounce.OnTimer := OnDebounceTimer;
+  ListBoxSuggestions.OnClick := OnSuggestionClick;
+end;
+
+procedure TMainForm.OnSearchChange(Sender: TObject);
+begin
+  // Reset debounce timer
+  TimerDebounce.Enabled := False;
+  TimerDebounce.Enabled := True;
+end;
+
+procedure TMainForm.OnDebounceTimer(Sender: TObject);
+var
+  SearchText: string;
+  Response: TJSONObject;
+  Suggestions: TJSONArray;
+  i: Integer;
+  Suggestion: TJSONObject;
+  PlaceText: string;
+begin
+  TimerDebounce.Enabled := False;
+  
+  SearchText := Trim(EditSearch.Text);
+  if SearchText.Length < 2 then
+  begin
+    ListBoxSuggestions.Items.Clear;
+    ListBoxSuggestions.Visible := False;
+    Exit;
+  end;
+  
+  // Make API call
+  Response := FPlacesAPI.SearchPlaces(SearchText);
+  try
+    if Assigned(Response) then
+    begin
+      ListBoxSuggestions.Items.Clear;
+      
+      Suggestions := Response.GetValue('suggestions') as TJSONArray;
+      if Assigned(Suggestions) then
+      begin
+        for i := 0 to Suggestions.Count - 1 do
+        begin
+          Suggestion := Suggestions.Items[i] as TJSONObject;
+          PlaceText := Suggestion.GetValue('placePrediction.text.text').Value;
+          ListBoxSuggestions.Items.Add(PlaceText);
+        end;
+        
+        ListBoxSuggestions.Visible := ListBoxSuggestions.Items.Count > 0;
+      end;
+    end;
+  finally
+    Response.Free;
+  end;
+end;
+
+procedure TMainForm.OnSuggestionClick(Sender: TObject);
+begin
+  if ListBoxSuggestions.ItemIndex >= 0 then
+  begin
+    EditSearch.Text := ListBoxSuggestions.Items[ListBoxSuggestions.ItemIndex];
+    ListBoxSuggestions.Visible := False;
+  end;
+end;</code></pre>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">🎨</span>UI Configuration</h2>
+            
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Form Design Properties</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-pascal">// EditSearch properties
+EditSearch.Anchors := [akLeft, akTop, akRight];
+EditSearch.Font.Size := 12;
+
+// ListBoxSuggestions properties
+ListBoxSuggestions.Anchors := [akLeft, akTop, akRight];
+ListBoxSuggestions.Visible := False;
+ListBoxSuggestions.Top := EditSearch.Top + EditSearch.Height;
+ListBoxSuggestions.Left := EditSearch.Left;
+ListBoxSuggestions.Width := EditSearch.Width;</code></pre>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">🔐</span>API Key Management</h2>
+            
+            <h3>Secure Storage Options</h3>
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Configuration File & Registry Storage</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-pascal">// Option 1: Configuration file
+function LoadApiKeyFromConfig: string;
+var
+  IniFile: TIniFile;
+begin
+  IniFile := TIniFile.Create(ChangeFileExt(Application.ExeName, '.ini'));
+  try
+    Result := IniFile.ReadString('API', 'GooglePlacesKey', '');
+  finally
+    IniFile.Free;
+  end;
+end;
+
+// Option 2: Registry
+function LoadApiKeyFromRegistry: string;
+var
+  Registry: TRegistry;
+begin
+  Registry := TRegistry.Create;
+  try
+    Registry.RootKey := HKEY_CURRENT_USER;
+    if Registry.OpenKey('\Software\YourApp\Settings', False) then
+      Result := Registry.ReadString('GooglePlacesKey');
+  finally
+    Registry.Free;
+  end;
+end;</code></pre>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">📦</span>Required Units</h2>
+            
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Uses Clause</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-pascal">uses
+  System.SysUtils,
+  System.Classes,
+  System.JSON,
+  System.Net.HttpClient,
+  System.Net.URLClient,
+  Vcl.Forms,
+  Vcl.Controls,
+  Vcl.StdCtrls,
+  Vcl.ExtCtrls,
+  System.IniFiles,
+  Winapi.Windows,
+  Registry;</code></pre>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">🚀</span>Key Differences from Web Version</h2>
+            
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>Web (JavaScript)</th>
+                        <th>Delphi Object Pascal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>HTTP Requests</strong></td>
+                        <td><code>fetch()</code> API</td>
+                        <td><code>THTTPClient</code> class</td>
+                    </tr>
+                    <tr>
+                        <td><strong>JSON Parsing</strong></td>
+                        <td>Native JSON support</td>
+                        <td><code>System.JSON</code> unit</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Debouncing</strong></td>
+                        <td><code>setTimeout()</code></td>
+                        <td><code>TTimer</code> component</td>
+                    </tr>
+                    <tr>
+                        <td><strong>UI Updates</strong></td>
+                        <td>DOM manipulation</td>
+                        <td>VCL component properties</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Storage</strong></td>
+                        <td><code>localStorage</code></td>
+                        <td>INI files/Registry</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Async Calls</strong></td>
+                        <td>Promises/async-await</td>
+                        <td>Synchronous (or threads)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">🎯</span>Advanced Features</h2>
+            
+            <h3>Async Implementation (Optional)</h3>
+            <div class="code-container">
+                <div class="code-header">
+                    <span>Asynchronous Search Implementation</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                </div>
+                <pre><code class="language-pascal">procedure TMainForm.SearchPlacesAsync(const Input: string);
+begin
+  TTask.Run(
+    procedure
+    var
+      Response: TJSONObject;
+    begin
+      Response := FPlacesAPI.SearchPlaces(Input);
+      
+      TThread.Synchronize(nil,
+        procedure
+        begin
+          UpdateSuggestionsList(Response);
+        end);
+    end);
+end;</code></pre>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon">✅</span>Features Provided</h2>
+            
+            <p>This Delphi implementation provides the same core functionality as your web application:</p>
+            <ul class="feature-list">
+                <li><strong>Real-time autocomplete</strong> with debouncing</li>
+                <li><strong>Google Places API integration</strong></li>
+                <li><strong>Responsive UI updates</strong></li>
+                <li><strong>Secure API key management</strong></li>
+                <li><strong>Error handling</strong></li>
+            </ul>
+            
+            <p style="margin-top: 20px; padding: 15px; background: #e6fffa; border-left: 4px solid #38b2ac; border-radius: 4px;">
+                <strong>🎯 Main Advantage:</strong> You get a <strong>native Windows application</strong> with better performance and offline capabilities!
+            </p>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Code copied to clipboard! ✅</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+        function copyCode(button) {
+            const codeBlock = button.parentElement.nextElementSibling.querySelector('code');
+            const text = codeBlock.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                // Show success feedback
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+                
+                // Show toast
+                const toast = document.getElementById('toast');
+                toast.classList.add('show');
+                
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                    button.classList.remove('copied');
+                    toast.classList.remove('show');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                button.textContent = 'Failed';
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                }, 2000);
+            });
+        }
+
+        // Initialize Prism
+        Prism.highlightAll();
+    </script>
+</body>
+</html>
