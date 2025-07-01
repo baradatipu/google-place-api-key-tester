@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Places Autocomplete</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Place Search with Autocomplete</h1>
+        
+        <!-- API Key Configuration Panel -->
+        <div class="api-config-panel">
+            <div class="config-header">
+                <h3>API Configuration</h3>
+                <button id="toggleConfig" class="toggle-btn">⚙️ Settings</button>
+            </div>
+            <div id="configContent" class="config-content">
+                <div class="input-group">
+                    <label for="apiKeyInput">Google Places API Key:</label>
+                    <input type="password" id="apiKeyInput" placeholder="Enter your Google Places API key..." autocomplete="off">
+                    <button id="showApiKey" class="show-btn" title="Show/Hide API Key">👁️</button>
+                </div>
+                <div class="button-group">
+                    <button id="saveApiKey" class="save-btn">Save API Key</button>
+                    <button id="testApiKey" class="test-btn">Test API Key</button>
+                    <button id="clearApiKey" class="clear-btn">Clear</button>
+                </div>
+                <div id="apiStatus" class="api-status"></div>
+            </div>
+        </div>
+        
+        <!-- Search Container -->
+        <div class="search-container">
+            <input type="text" id="placeInput" placeholder="Type a place name..." autocomplete="off">
+            <div id="suggestions" class="suggestions-container"></div>
+        </div>
+        
+        <!-- Developer Documentation -->
+        <div class="dev-docs-section">
+            <h3>📚 Developer Documentation</h3>
+            <div class="doc-links">
+                <a href="README.md" target="_blank" class="doc-link readme-link">
+                    📖 Setup Guide & Documentation
+                </a>
+                <a href="troubleshooting.md" target="_blank" class="doc-link troubleshooting-link">
+                    🔧 Troubleshooting Guide
+                </a>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
